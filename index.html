@@ -1,0 +1,1566 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Background Images in Twine (Harlowe) — COMP 380</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap");
+
+      :root {
+        --bg: #f7f6f2;
+        --surface: #ffffff;
+        --dark: #0f1923;
+        --navy: #1a2b3c;
+        --teal: #0d9488;
+        --teal-lt: #14b8a6;
+        --teal-bg: #f0fdfa;
+        --amber: #92400e;
+        --amber-bg: #fffbeb;
+        --mid: #374151;
+        --sub: #6b7280;
+        --rule: #e5e7eb;
+        --code-bg: #0f1923;
+        --code-fg: #e2e8f0;
+        --code-teal: #5eead4;
+        --code-amber: #fcd34d;
+        --code-dim: #64748b;
+        --code-purple: #c4b5fd;
+        --code-red: #fca5a5;
+        --code-blue: #93c5fd;
+        --step-bg: #eff6ff;
+        --step-num: #1d4ed8;
+        --green: #065f46;
+        --green-bg: #ecfdf5;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "DM Sans", sans-serif;
+        font-size: 16px;
+        line-height: 1.7;
+        color: var(--mid);
+        background: var(--bg);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── Layout ── */
+      .page-wrap {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: 100vh;
+      }
+
+      /* ── Sidebar ── */
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: var(--dark);
+        padding: 2rem 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar-brand {
+        padding: 0 1.5rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 1rem;
+      }
+
+      .sidebar-brand .course {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--teal-lt);
+        display: block;
+        margin-bottom: 0.35rem;
+      }
+
+      .sidebar-brand .title {
+        font-family: "Lora", serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #f1f5f9;
+        line-height: 1.4;
+      }
+
+      .nav-section {
+        padding: 0.4rem 0;
+      }
+
+      .nav-section-label {
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.3);
+        padding: 0.6rem 1.5rem 0.2rem;
+      }
+
+      .nav-link {
+        display: block;
+        padding: 0.4rem 1.5rem;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.55);
+        text-decoration: none;
+        border-left: 2px solid transparent;
+        transition: all 0.15s;
+      }
+
+      .nav-link:hover {
+        color: #f1f5f9;
+        background: rgba(255, 255, 255, 0.05);
+        border-left-color: var(--teal);
+      }
+
+      .nav-link.active {
+        color: var(--teal-lt);
+        border-left-color: var(--teal);
+        background: rgba(13, 148, 136, 0.1);
+      }
+
+      .nav-link.indent {
+        padding-left: 2.25rem;
+        font-size: 12px;
+      }
+
+      /* ── Main ── */
+      main {
+        min-width: 0;
+        padding: 3rem 3.5rem 5rem;
+        max-width: 860px;
+      }
+
+      /* ── Page header ── */
+      .page-header {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .page-header .eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--teal);
+        display: block;
+        margin-bottom: 0.75rem;
+      }
+
+      .page-header h1 {
+        font-family: "Lora", serif;
+        font-size: 2.4rem;
+        font-weight: 700;
+        color: var(--dark);
+        line-height: 1.2;
+        margin-bottom: 0.75rem;
+      }
+
+      .page-header .subtitle {
+        font-size: 1.05rem;
+        font-weight: 300;
+        color: var(--sub);
+        font-style: italic;
+        font-family: "Lora", serif;
+      }
+
+      /* ── Section ── */
+      .section {
+        margin-bottom: 4rem;
+      }
+
+      .part-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .part-badge {
+        flex-shrink: 0;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: var(--teal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+      }
+
+      .part-header h2 {
+        font-family: "Lora", serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark);
+      }
+
+      h3 {
+        font-family: "DM Sans", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--teal);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 2rem 0 0.75rem;
+      }
+
+      p {
+        margin-bottom: 0.9rem;
+        font-size: 15.5px;
+        line-height: 1.75;
+      }
+      p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* ── Method comparison cards ── */
+      .method-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1.5rem 0;
+      }
+
+      .method-card {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .method-card-head {
+        padding: 0.9rem 1.2rem 0.7rem;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .method-card-head .method-num {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--teal);
+        display: block;
+        margin-bottom: 0.2rem;
+      }
+
+      .method-card-head .method-title {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--dark);
+      }
+
+      .method-card-body {
+        padding: 1rem 1.2rem;
+      }
+      .method-card-body p {
+        font-size: 14px;
+        color: var(--mid);
+        margin-bottom: 0.6rem;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.75rem;
+      }
+
+      .tag {
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 0.15em 0.55em;
+        border-radius: 3px;
+      }
+
+      .tag.good {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .tag.warn {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .tag.info {
+        background: var(--step-bg);
+        color: var(--step-num);
+      }
+
+      /* ── Steps ── */
+      .steps {
+        list-style: none;
+        counter-reset: steps;
+        margin: 1.25rem 0;
+      }
+
+      .steps li {
+        counter-increment: steps;
+        display: grid;
+        grid-template-columns: 2rem 1fr;
+        gap: 0.75rem;
+        margin-bottom: 0.9rem;
+        align-items: start;
+      }
+
+      .steps li::before {
+        content: counter(steps);
+        width: 2rem;
+        height: 2rem;
+        background: var(--step-bg);
+        border: 1.5px solid #bfdbfe;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--step-num);
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+        font-family: "DM Sans", sans-serif;
+      }
+
+      .steps li p {
+        margin: 0;
+        padding-top: 0.2rem;
+      }
+
+      /* ── Sub-bullets ── */
+      .subbullets {
+        list-style: none;
+        margin: 0.5rem 0 0.75rem 2.75rem;
+      }
+
+      .subbullets li {
+        position: relative;
+        padding-left: 1.1rem;
+        margin-bottom: 0.4rem;
+        font-size: 14.5px;
+        color: var(--mid);
+        line-height: 1.6;
+      }
+
+      .subbullets li::before {
+        content: "–";
+        position: absolute;
+        left: 0;
+        color: var(--teal);
+        font-weight: 600;
+      }
+
+      /* ── Code blocks ── */
+      pre {
+        background: var(--code-bg);
+        border-radius: 6px;
+        border-left: 3px solid var(--teal);
+        padding: 1.2rem 1.4rem;
+        margin: 1rem 0 1.2rem;
+        overflow-x: auto;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.65;
+        color: var(--code-fg);
+        min-width: 800px;
+      }
+
+      pre.css-block {
+        border-left-color: #7c3aed;
+      }
+      pre.warn-block {
+        border-left-color: #d97706;
+      }
+
+      pre .comment {
+        color: var(--code-dim);
+        font-style: italic;
+      }
+      pre .key {
+        color: var(--code-teal);
+      }
+      pre .val {
+        color: var(--code-amber);
+      }
+      pre .tag {
+        color: var(--code-blue);
+      }
+      pre .attr {
+        color: var(--code-red);
+      }
+      pre .string {
+        color: var(--code-amber);
+      }
+      pre .fn {
+        color: var(--code-purple);
+      }
+      pre .macro {
+        color: var(--code-teal);
+      }
+
+      code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12.5px;
+        background: #eef2f7;
+        color: var(--teal);
+        padding: 0.1em 0.4em;
+        border-radius: 3px;
+        font-weight: 600;
+      }
+
+      pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+        font-size: inherit;
+        font-weight: inherit;
+        border-radius: 0;
+      }
+
+      /* ── Callouts ── */
+      .callout {
+        border-radius: 0 6px 6px 0;
+        padding: 1.1rem 1.3rem;
+        margin: 1.25rem 0;
+        border-left: 4px solid;
+      }
+
+      .callout.tip {
+        background: var(--teal-bg);
+        border-color: var(--teal);
+      }
+      .callout.warning {
+        background: var(--amber-bg);
+        border-color: #d97706;
+      }
+      .callout.note {
+        background: var(--step-bg);
+        border-color: var(--step-num);
+      }
+
+      .callout-label {
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+
+      .callout.tip .callout-label {
+        color: var(--teal);
+      }
+      .callout.warning .callout-label {
+        color: var(--amber);
+      }
+      .callout.note .callout-label {
+        color: var(--step-num);
+      }
+
+      .callout p {
+        font-size: 14.5px;
+        line-height: 1.65;
+        margin-bottom: 0.5rem;
+      }
+      .callout p:last-child {
+        margin-bottom: 0;
+      }
+      .callout.tip p {
+        color: #0f766e;
+      }
+      .callout.warning p {
+        color: var(--amber);
+      }
+      .callout.note p {
+        color: #1e40af;
+      }
+
+      /* ── Comparison table ── */
+      .compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.25rem 0;
+        font-size: 14px;
+      }
+
+      .compare-table th {
+        background: var(--dark);
+        color: white;
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 0.65rem 1rem;
+        text-align: left;
+      }
+
+      .compare-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+        line-height: 1.55;
+      }
+
+      .compare-table tr:last-child td {
+        border-bottom: none;
+      }
+      .compare-table td:first-child {
+        font-weight: 600;
+        color: var(--dark);
+        background: #f8fafc;
+        width: 22%;
+      }
+      .compare-table td:not(:first-child) {
+        background: white;
+        color: var(--mid);
+      }
+
+      /* ── Trouble table ── */
+      .trouble-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.25rem 0;
+        font-size: 14px;
+      }
+
+      .trouble-table th {
+        background: var(--dark);
+        color: white;
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 0.65rem 1rem;
+        text-align: left;
+      }
+
+      .trouble-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+        line-height: 1.6;
+      }
+      .trouble-table tr:last-child td {
+        border-bottom: none;
+      }
+      .trouble-table td:first-child {
+        font-weight: 600;
+        color: var(--dark);
+        background: #f8fafc;
+        width: 38%;
+      }
+      .trouble-table td:last-child {
+        background: white;
+        color: var(--mid);
+      }
+
+      /* ── Checklist ── */
+      .checklist {
+        list-style: none;
+        margin: 1rem 0;
+      }
+
+      .checklist li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 14.5px;
+        color: var(--mid);
+        line-height: 1.5;
+      }
+
+      .checklist li:last-child {
+        border-bottom: none;
+      }
+
+      .checklist li::before {
+        content: "";
+        flex-shrink: 0;
+        width: 1.1rem;
+        height: 1.1rem;
+        border: 2px solid #d1d5db;
+        border-radius: 3px;
+        margin-top: 0.15rem;
+        background: white;
+      }
+
+      /* ── Divider ── */
+      hr.sep {
+        border: none;
+        border-top: 1px solid var(--rule);
+        margin: 3rem 0;
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 900px) {
+        .page-wrap {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          position: static;
+          height: auto;
+          padding: 1rem 1.5rem;
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+        .sidebar-brand {
+          border: none;
+          padding: 0;
+          margin: 0;
+        }
+        .nav-section {
+          display: none;
+        }
+        main {
+          padding: 2rem 1.5rem 4rem;
+          max-width: 100%;
+        }
+        .method-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media print {
+        .sidebar {
+          display: none;
+        }
+        .page-wrap {
+          display: block;
+        }
+        main {
+          padding: 0;
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrap">
+      <!-- Sidebar -->
+      <nav class="sidebar" aria-label="Guide navigation">
+        <div class="sidebar-brand">
+          <span class="course">COMP 380 · Harlowe</span>
+          <span class="title">Background Images in Twine</span>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Overview</div>
+          <a href="#overview" class="nav-link">The three approaches</a>
+          <a href="#which" class="nav-link">Which one to use</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Method 1 — Enchant</div>
+          <a href="#method1" class="nav-link">Same bg every passage</a>
+          <a href="#m1-per-passage" class="nav-link indent"
+            >Different bg per passage</a
+          >
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Method 2 — CSS + Tags</div>
+          <a href="#method2" class="nav-link">Passage tags in CSS</a>
+          <a href="#m2-setup" class="nav-link indent">Stylesheet setup</a>
+          <a href="#m2-tagging" class="nav-link indent">Tagging passages</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Method 3 — Base64</div>
+          <a href="#method3" class="nav-link">When &amp; why</a>
+          <a href="#m3-convert" class="nav-link indent">Converting an image</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Finishing touches</div>
+          <a href="#styling" class="nav-link">Styling the text box</a>
+          <a href="#hosted" class="nav-link">Hosting your images</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Reference</div>
+          <a href="#checklist" class="nav-link">Checklist</a>
+          <a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+        </div>
+      </nav>
+
+      <!-- Main -->
+      <main id="main">
+        <header class="page-header">
+          <span class="eyebrow"
+            >COMP 380 · Technology, Ethics &amp; Culture · Harlowe</span
+          >
+          <h1>Background Images in Twine</h1>
+          <p class="subtitle">
+            Three methods for setting passage backgrounds, and when to use each
+            one
+          </p>
+        </header>
+
+        <p style="font-size: 16px; line-height: 1.8">
+          Adding a background image to a Twine passage is one of the most
+          effective ways to establish place, mood, and atmosphere without adding
+          image elements to every passage individually. This guide covers all
+          three workable methods, explains why local images cause problems, and
+          gives you the simplest path to a working background for your project.
+        </p>
+
+        <!-- ── OVERVIEW ── -->
+        <section class="section" id="overview">
+          <div class="part-header">
+            <div class="part-badge">→</div>
+            <h2>The three approaches</h2>
+          </div>
+
+          <p>
+            There are three ways to add a background image in Harlowe. They
+            differ in how images are stored, how much setup is required, and
+            whether the background changes between passages.
+          </p>
+
+          <div class="method-grid">
+            <div class="method-card">
+              <div class="method-card-head">
+                <span class="method-num">Method 1</span>
+                <div class="method-title">(enchant:) macro + hosted URL</div>
+              </div>
+              <div class="method-card-body">
+                <p>
+                  Place an <code>(enchant:?page, (bg:"url"))</code> macro in a
+                  header-tagged passage. The image is loaded from a hosted URL
+                  each time the story runs.
+                </p>
+                <div class="tag-row">
+                  <span class="tag good">Simplest code</span>
+                  <span class="tag good">No conversion</span>
+                  <span class="tag warn">Needs internet</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="method-card">
+              <div class="method-card-head">
+                <span class="method-num">Method 2</span>
+                <div class="method-title">CSS passage tags + hosted URL</div>
+              </div>
+              <div class="method-card-body">
+                <p>
+                  Tag individual passages and write CSS rules in the Story
+                  Stylesheet targeting each tag. Different passages get
+                  different backgrounds automatically.
+                </p>
+                <div class="tag-row">
+                  <span class="tag good">Per-passage control</span>
+                  <span class="tag good">No conversion</span>
+                  <span class="tag warn">Needs internet</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="method-card">
+              <div class="method-card-head">
+                <span class="method-num">Method 3</span>
+                <div class="method-title">Base64-encoded image in CSS</div>
+              </div>
+              <div class="method-card-body">
+                <p>
+                  Convert the image to a Base64 string and embed it directly in
+                  the Story Stylesheet. The story is fully self-contained — no
+                  internet connection needed.
+                </p>
+                <div class="tag-row">
+                  <span class="tag good">Works offline</span>
+                  <span class="tag good">Self-contained</span>
+                  <span class="tag warn">Large file size</span>
+                  <span class="tag warn">Unwieldy to edit</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="method-card">
+              <div class="method-card-head">
+                <span class="method-num">Why not local files?</span>
+                <div class="method-title">The local file problem</div>
+              </div>
+              <div class="method-card-body">
+                <p>
+                  If you write
+                  <code>background-image: url("photo.jpg")</code> in CSS,
+                  browsers block the load when the <code>.html</code> is opened
+                  directly from your computer — a security restriction called
+                  the same-origin policy. The <code>(bg:)</code> macro sidesteps
+                  this, but CSS <code>url()</code> does not.
+                </p>
+                <div class="tag-row">
+                  <span class="tag warn">Breaks in CSS url()</span>
+                  <span class="tag info">Works via (bg:) macro</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3 id="which">Which method to use</h3>
+
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Your situation</th>
+                <th>Recommended method</th>
+                <th>Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Same background on every passage</td>
+                <td>Method 1 — (enchant:) in a header passage</td>
+                <td>One passage, two lines of code. Done.</td>
+              </tr>
+              <tr>
+                <td>Different backgrounds on different passages</td>
+                <td>Method 2 — CSS + passage tags</td>
+                <td>Tag each passage once; CSS handles the rest.</td>
+              </tr>
+              <tr>
+                <td>Story must work offline / fully self-contained</td>
+                <td>Method 3 — Base64</td>
+                <td>Image is embedded in the HTML file itself.</td>
+              </tr>
+              <tr>
+                <td>Not sure — just want to get started</td>
+                <td>Method 1</td>
+                <td>
+                  Easiest to set up; works reliably with a hosted image URL.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <hr class="sep" />
+
+        <!-- ── METHOD 1 ── -->
+        <section class="section" id="method1">
+          <div class="part-header">
+            <div class="part-badge">1</div>
+            <h2>Method 1 — The (enchant:) Macro</h2>
+          </div>
+
+          <p>
+            This is the simplest method. You write a small block of Harlowe
+            macros in a special passage that runs on every page, and the image
+            appears as the background for the whole story.
+          </p>
+
+          <h3>Setting up the header passage</h3>
+
+          <ol class="steps">
+            <li>
+              <p>
+                In Twine, create a <strong>new passage</strong>. Name it
+                anything — <code>Style</code> is conventional.
+              </p>
+            </li>
+            <li>
+              <p>
+                Open the passage, click the tag icon, and add the tag
+                <code>header</code>. This tells Harlowe to run this passage's
+                content before every other passage.
+              </p>
+            </li>
+            <li>
+              <p>
+                Paste the following code into the passage, replacing the URL
+                with your own image:
+              </p>
+
+              <pre><code>{
+<span class="macro">(enchant:</span> ?page, <span class="macro">(bg:</span><span class="string">"https://your-image-url.jpg"</span>)<span class="macro">)</span>
+<span class="macro">(enchant:</span> ?passage, <span class="macro">(text-colour:</span>black<span class="macro">)</span> + <span class="macro">(bg:</span>#ffffff<span class="macro">)</span> + <span class="macro">(css:</span><span class="string">"padding:1.5em"</span>)<span class="macro">)</span>
+<span class="macro">(enchant:</span> ?link, <span class="macro">(colour:</span>navy<span class="macro">))</span>
+}</code></pre>
+            </li>
+            <li>
+              <p>
+                Click Play to test. The background should appear behind the
+                white text box on every passage.
+              </p>
+            </li>
+          </ol>
+
+          <div class="callout tip">
+            <div class="callout-label">💡 What those macros do</div>
+            <p>
+              <code>(enchant: ?page, (bg:"url"))</code> — sets the full-page
+              background to your image.
+            </p>
+            <p>
+              <code>(enchant: ?passage, ...)</code> — styles the text box: white
+              background, black text, padding. Without this, text sits directly
+              on the image and is hard to read.
+            </p>
+            <p>
+              <code>(enchant: ?link, (colour:navy))</code> — makes links navy
+              blue so they stand out against the white text box. Change this to
+              any colour you like.
+            </p>
+            <p>
+              The <code>{ }</code> curly braces collapse whitespace so the
+              macros produce no visible output.
+            </p>
+          </div>
+
+          <h3 id="m1-per-passage">
+            Using different backgrounds per passage with Method 1
+          </h3>
+
+          <p>
+            Method 1 applies the same image everywhere. If you want different
+            backgrounds on different passages, you have two options:
+          </p>
+
+          <p>
+            <strong>Option A:</strong> Add
+            <code>(enchant: ?page, (bg:"different-url.jpg"))</code> directly at
+            the top of individual passages where you want an override. This
+            replaces the header's background just for that passage.
+          </p>
+
+          <p>
+            <strong>Option B:</strong> Switch to Method 2, which is cleaner when
+            you have several different backgrounds.
+          </p>
+
+          <div class="callout warning">
+            <div class="callout-label">⚠️ Important</div>
+            <p>
+              The image URL must be a <strong>full https:// address</strong> —
+              not a filename like <code>"forest.jpg"</code>. Local filenames
+              work during Twine's preview mode (Play/Test) but break in the
+              exported <code>.html</code> file unless the image is in the same
+              folder. Use a hosted URL or Base64 (Method 3) for a reliably
+              portable file.
+            </p>
+          </div>
+        </section>
+
+        <hr class="sep" />
+
+        <!-- ── METHOD 2 ── -->
+        <section class="section" id="method2">
+          <div class="part-header">
+            <div class="part-badge">2</div>
+            <h2>Method 2 — CSS Passage Tags</h2>
+          </div>
+
+          <p>
+            This method lets each passage have its own background image. You tag
+            individual passages in Twine, then write CSS rules in the Story
+            Stylesheet that target those tags. Harlowe automatically adds each
+            passage's tags to the <code>tw-story</code> element when that
+            passage is displayed, so the right CSS rule fires at the right time.
+          </p>
+
+          <h3 id="m2-setup">Step 1 — Add rules to the Story Stylesheet</h3>
+
+          <ol class="steps">
+            <li>
+              <p>
+                In Twine, click the story name in the bottom toolbar →
+                <strong>Edit Story Stylesheet</strong>.
+              </p>
+            </li>
+            <li>
+              <p>
+                Add one rule per background image. Each rule uses a
+                <code>tw-story[tags~="tagname"]</code> selector:
+              </p>
+
+              <pre
+                class="css-block"
+              ><code><span class="comment">/* Default background for all passages */</span>
+tw-story {
+  background-image: url(<span class="string">'https://your-default-bg.jpg'</span>);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+<span class="comment">/* Forest passages — tag: forest */</span>
+tw-story[tags~=<span class="string">"forest"</span>] {
+  background-image: url(<span class="string">'https://your-forest-image.jpg'</span>);
+  background-size: cover;
+  background-position: center;
+}
+
+<span class="comment">/* City passages — tag: city */</span>
+tw-story[tags~=<span class="string">"city"</span>] {
+  background-image: url(<span class="string">'https://your-city-image.jpg'</span>);
+  background-size: cover;
+  background-position: center;
+}
+
+<span class="comment">/* Style the text box so it's readable over any background */</span>
+tw-passage {
+  background: rgba(255, 255, 255, 0.92);
+  padding: 1.5em 2em;
+  border-radius: 4px;
+  max-width: 700px;
+  margin: 2em auto;
+}</code></pre>
+            </li>
+            <li><p>Close the stylesheet editor.</p></li>
+          </ol>
+
+          <div class="callout note">
+            <div class="callout-label">
+              ℹ️ Why background-attachment: fixed?
+            </div>
+            <p>
+              Adding <code>background-attachment: fixed</code> to the default
+              rule stops the background image from scrolling with the page — it
+              stays locked in place while the text box scrolls over it. This
+              looks more polished but can cause visual glitches on iOS Safari.
+              Leave it out if you are targeting mobile.
+            </p>
+          </div>
+
+          <h3 id="m2-tagging">Step 2 — Tag your passages</h3>
+
+          <ol class="steps">
+            <li>
+              <p>
+                In the story map, double-click a passage to open it in the
+                editor.
+              </p>
+            </li>
+            <li>
+              <p>
+                Click the <strong>tag icon</strong> (looks like a label) in the
+                passage editor toolbar.
+              </p>
+            </li>
+            <li>
+              <p>
+                Type your tag name — for example <code>forest</code> — and press
+                Enter.
+              </p>
+            </li>
+            <li>
+              <p>
+                The tag must match <strong>exactly</strong> what you wrote in
+                the CSS: same spelling, same capitalisation.
+                <code>Forest</code> and <code>forest</code> are different.
+              </p>
+            </li>
+            <li>
+              <p>
+                Repeat for every passage that needs a background. Passages with
+                no tag use the default <code>tw-story</code> rule (or no image
+                if you did not write one).
+              </p>
+            </li>
+          </ol>
+
+          <div class="callout tip">
+            <div class="callout-label">💡 Tip — adding multiple tags</div>
+            <p>
+              A passage can have more than one tag. You can combine a background
+              tag (like <code>forest</code>) with a mood tag (like
+              <code>tense</code>) and write separate CSS rules for each. Both
+              sets of styles will apply at the same time.
+            </p>
+          </div>
+        </section>
+
+        <hr class="sep" />
+
+        <!-- ── METHOD 3 ── -->
+        <section class="section" id="method3">
+          <div class="part-header">
+            <div class="part-badge">3</div>
+            <h2>Method 3 — Base64-Encoded Images</h2>
+          </div>
+
+          <p>
+            Base64 encoding converts a binary image file into a long string of
+            text characters that can be embedded directly in HTML or CSS. The
+            result is a completely self-contained <code>.html</code> file that
+            displays the image correctly whether it is online or offline,
+            without needing any companion files.
+          </p>
+
+          <p>
+            The downside is size: a 500KB image becomes roughly 667KB of text,
+            and even a single large image makes the stylesheet unwieldy to look
+            at. Use this method when portability matters more than file tidiness
+            — for a class submission, for example.
+          </p>
+
+          <h3 id="m3-convert">Step 1 — Convert your image to Base64</h3>
+
+          <ol class="steps">
+            <li>
+              <p>Go to <strong>base64-image.de</strong> in your browser.</p>
+            </li>
+            <li>
+              <p>
+                Click <strong>Upload image</strong> and select your file, or
+                paste an image URL.
+              </p>
+            </li>
+            <li>
+              <p>
+                Once converted, click <strong>Copy CSS</strong>. This copies a
+                ready-to-use CSS declaration like:
+              </p>
+
+              <pre
+                class="warn-block"
+              ><code>background-image: url(<span class="string">'data:image/jpeg;base64,/9j/4AAQSkZJRgAB...'</span>);
+<span class="comment">/* ... thousands of characters ... */</span></code></pre>
+            </li>
+            <li>
+              <p>Open Twine → <strong>Edit Story Stylesheet</strong>.</p>
+            </li>
+            <li>
+              <p>
+                Write your CSS rule and paste the copied declaration inside it:
+              </p>
+
+              <pre class="css-block"><code>tw-story {
+  background-image: url(<span class="string">'data:image/jpeg;base64,/9j/4AAQ...'</span>);
+  background-size: cover;
+  background-position: center;
+}
+
+tw-passage {
+  background: rgba(255, 255, 255, 0.92);
+  padding: 1.5em 2em;
+  max-width: 700px;
+  margin: 2em auto;
+}</code></pre>
+            </li>
+          </ol>
+
+          <div class="callout warning">
+            <div class="callout-label">⚠️ Image size matters</div>
+            <p>
+              Keep images under 300–400KB before encoding. A 3MB photograph will
+              generate a ~4MB Base64 string, making the entire stylesheet slow
+              to load and difficult to edit. Resize or compress your image first
+              — tools like <strong>squoosh.app</strong> (free, browser-based)
+              can reduce file size dramatically with minimal quality loss.
+            </p>
+          </div>
+
+          <h3>Using Base64 with passage tags (Method 2 + Method 3 combined)</h3>
+          <p>
+            You can combine Base64 encoding with passage tags. Just use the same
+            <code>tw-story[tags~="tagname"]</code> selector, but use the Base64
+            data URL instead of an https:// URL. This gives you per-passage
+            backgrounds with full offline portability — at the cost of a very
+            large stylesheet.
+          </p>
+        </section>
+
+        <hr class="sep" />
+
+        <!-- ── STYLING ── -->
+        <section class="section" id="styling">
+          <div class="part-header">
+            <div class="part-badge">+</div>
+            <h2>Styling the Text Box</h2>
+          </div>
+
+          <p>
+            Whatever method you use for the background, you need to make sure
+            the text is readable over it. The default Harlowe text box has no
+            background of its own and sits directly on top of whatever is behind
+            it. These are the most useful CSS properties for the passage text
+            box:
+          </p>
+
+          <pre class="css-block"><code>tw-passage {
+  <span class="comment">/* Semi-transparent white box — adjust opacity as needed */</span>
+  background: <span class="val">rgba(255, 255, 255, 0.90)</span>;
+
+  <span class="comment">/* Or a fully opaque dark box for dramatic effect */</span>
+  <span class="comment">/* background: rgba(0, 0, 0, 0.75); color: white; */</span>
+
+  <span class="comment">/* Space inside the box */</span>
+  padding: <span class="val">1.5em 2em</span>;
+
+  <span class="comment">/* Limit width so text doesn't stretch too wide */</span>
+  max-width: <span class="val">680px</span>;
+
+  <span class="comment">/* Centre the box on the page */</span>
+  margin: <span class="val">2em auto</span>;
+
+  <span class="comment">/* Optionally round the corners */</span>
+  border-radius: <span class="val">6px</span>;
+}</code></pre>
+
+          <div class="callout tip">
+            <div class="callout-label">💡 Design principle</div>
+            <p>
+              The passage box and the background are in tension: a vivid
+              background image wants to be seen, but readable text needs
+              contrast. A semi-transparent white box
+              (<code>rgba(255,255,255,0.88)</code>) is usually the right balance
+              — it lets a sliver of the image show through the edges while
+              keeping text crisp. Adjust the last value (opacity) between 0.7
+              and 1.0 to taste.
+            </p>
+          </div>
+
+          <h3>Setting background size and position</h3>
+          <p>These two CSS properties control how the image fits the page:</p>
+
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Property &amp; value</th>
+                <th>Effect</th>
+                <th>Best for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>background-size: cover</code></td>
+                <td>
+                  Scales the image to fill the entire screen, cropping if
+                  necessary. No empty areas.
+                </td>
+                <td>Photographs and full-bleed scenes</td>
+              </tr>
+              <tr>
+                <td><code>background-size: contain</code></td>
+                <td>
+                  Scales the image to fit entirely within the screen. May leave
+                  empty bars at the sides or top.
+                </td>
+                <td>
+                  Illustrated maps or images where nothing should be cropped
+                </td>
+              </tr>
+              <tr>
+                <td><code>background-position: center</code></td>
+                <td>Centres the image in both axes when cropping occurs.</td>
+                <td>Most images</td>
+              </tr>
+              <tr>
+                <td><code>background-position: top center</code></td>
+                <td>Aligns the top of the image with the top of the screen.</td>
+                <td>Images where the important content is near the top</td>
+              </tr>
+              <tr>
+                <td><code>background-repeat: no-repeat</code></td>
+                <td>
+                  Prevents tiling. Usually needed with <code>contain</code>.
+                </td>
+                <td>Any non-tiling image</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <hr class="sep" />
+
+        <!-- ── HOSTING ── -->
+        <section class="section" id="hosted">
+          <div class="part-header">
+            <div class="part-badge">↗</div>
+            <h2>Hosting Your Images</h2>
+          </div>
+
+          <p>
+            Methods 1 and 2 require a hosted image URL — an
+            <code>https://</code> address that loads the image from the
+            internet. Here are the most practical options for students:
+          </p>
+
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>How to get a direct URL</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Flickr</td>
+                <td>
+                  Open the photo page → click the download arrow → choose a size
+                  → right-click the opened image → Copy image address.
+                </td>
+                <td>
+                  URLs are stable. Free account. Images must be set to public.
+                </td>
+              </tr>
+              <tr>
+                <td>Unsplash / Pexels</td>
+                <td>
+                  Open any photo → right-click → Copy image address. Or use the
+                  direct download URL.
+                </td>
+                <td>Free to use. Large library of high-quality images.</td>
+              </tr>
+              <tr>
+                <td>Wikimedia Commons</td>
+                <td>
+                  Open the file page → click the image to get the
+                  full-resolution view → copy the URL from the address bar.
+                </td>
+                <td>Stable long-term URLs. Check the licence before use.</td>
+              </tr>
+              <tr>
+                <td>GitHub</td>
+                <td>
+                  Upload image to a public repository → open the raw file → copy
+                  the raw URL (starts with
+                  <code>raw.githubusercontent.com</code>).
+                </td>
+                <td>Reliable. Requires a free GitHub account.</td>
+              </tr>
+              <tr>
+                <td>Same folder as .html</td>
+                <td>
+                  Use a relative filename like <code>"images/forest.jpg"</code>.
+                </td>
+                <td>
+                  Works when the exported <code>.html</code> and images folder
+                  are kept together. Breaks if separated.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout warning">
+            <div class="callout-label">⚠️ Check your URL format</div>
+            <p>
+              A working image URL ends with a file extension like
+              <code>.jpg</code>, <code>.png</code>, or <code>.webp</code>. URLs
+              that end in a page address (like
+              <code>flickr.com/photos/user/12345</code>) are webpage URLs — they
+              point to an HTML page that <em>contains</em> an image, not to the
+              image itself. Always open the image in its own tab to get the
+              direct URL.
+            </p>
+          </div>
+        </section>
+
+        <hr class="sep" />
+
+        <!-- ── CHECKLIST ── -->
+        <section class="section" id="checklist">
+          <div class="part-header">
+            <div class="part-badge">✓</div>
+            <h2>Complete Checklist</h2>
+          </div>
+
+          <p>
+            Use this to confirm you have covered everything before submitting.
+          </p>
+
+          <ul class="checklist">
+            <li>
+              Decided which method to use based on your needs (same bg /
+              per-passage / offline)
+            </li>
+            <li>
+              Found or created your image(s) and obtained direct
+              <code>https://</code> URLs (or prepared Base64 strings)
+            </li>
+            <li>
+              <strong>Method 1:</strong> Created a new passage, added the
+              <code>header</code> tag, and pasted the enchant macro block
+            </li>
+            <li>
+              <strong>Method 2:</strong> Added
+              <code>tw-story[tags~="tagname"]</code> rules to the Story
+              Stylesheet for each background
+            </li>
+            <li>
+              <strong>Method 2:</strong> Tagged each passage in Twine with the
+              matching tag name, spelled identically to the CSS
+            </li>
+            <li>
+              <strong>Method 3:</strong> Compressed image to under 400KB,
+              converted with base64-image.de, pasted into Story Stylesheet
+            </li>
+            <li>
+              Added <code>tw-passage</code> CSS to style the text box
+              (background, padding, max-width)
+            </li>
+            <li>
+              Tested in Play mode — background appears and text is readable
+            </li>
+            <li>
+              Published to File and tested in a browser (not just Twine's
+              internal preview)
+            </li>
+            <li>
+              Confirmed the exported <code>.html</code> works correctly when
+              moved to a different folder or shared
+            </li>
+          </ul>
+        </section>
+
+        <hr class="sep" />
+
+        <!-- ── TROUBLESHOOTING ── -->
+        <section class="section" id="troubleshooting">
+          <div class="part-header">
+            <div class="part-badge">?</div>
+            <h2>Troubleshooting</h2>
+          </div>
+
+          <table class="trouble-table">
+            <thead>
+              <tr>
+                <th>Problem</th>
+                <th>Most likely cause and fix</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  Background shows in Twine preview but not in the exported file
+                </td>
+                <td>
+                  You used a local filename (<code>"forest.jpg"</code>) in CSS
+                  <code>url()</code>. Browsers block local files in CSS. Either
+                  host the image and use a full <code>https://</code> URL, or
+                  switch to Base64 (Method 3), or keep the image in the same
+                  folder as the <code>.html</code> file and use a relative path.
+                </td>
+              </tr>
+              <tr>
+                <td>Background does not appear at all</td>
+                <td>
+                  Check the URL is correct: open it in a browser tab — you
+                  should see only the image, not a webpage. Also check the CSS
+                  selector is targeting the right element. In Harlowe, use
+                  <code>tw-story</code>, not <code>body</code> or
+                  <code>html</code>.
+                </td>
+              </tr>
+              <tr>
+                <td>CSS tag rule is not triggering on a passage</td>
+                <td>
+                  The tag in Twine and the tag in the CSS do not match exactly.
+                  Check for differences in capitalisation, spaces, or
+                  punctuation. <code>Forest</code> and <code>forest</code> are
+                  different tags.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  (enchant:?page, (bg:"url")) fails silently — no image, no
+                  error
+                </td>
+                <td>
+                  The URL is either wrong or the image host is blocking
+                  cross-origin loads. Test the URL in a browser tab first. If
+                  the image loads there but not in Twine, the host may not allow
+                  embedding — choose a different host.
+                </td>
+              </tr>
+              <tr>
+                <td>Text is unreadable over the background image</td>
+                <td>
+                  The <code>tw-passage</code> background has not been set. Add
+                  <code
+                    >tw-passage { background: rgba(255,255,255,0.9); padding:
+                    1.5em 2em; }</code
+                  >
+                  to the Story Stylesheet, or add
+                  <code
+                    >(enchant: ?passage, (bg:#ffffff) +
+                    (css:"padding:1.5em"))</code
+                  >
+                  to the header passage.
+                </td>
+              </tr>
+              <tr>
+                <td>Background image is stretched or pixelated</td>
+                <td>
+                  Add
+                  <code
+                    >background-size: cover; background-position: center;</code
+                  >
+                  to the CSS rule. Without these, the browser tiles or stretches
+                  the image at its natural size.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Base64 string causes an error or the stylesheet won't save
+                </td>
+                <td>
+                  The string may be incomplete — Base64 strings are very long
+                  and easy to accidentally truncate when copying. Try the
+                  conversion tool again and use its dedicated copy button rather
+                  than selecting the text manually.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <footer
+          style="
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--rule);
+          "
+        >
+          <p style="font-size: 12px; color: var(--sub); letter-spacing: 0.04em">
+            COMP 380 · Technology, Ethics &amp; Culture · Background Images in
+            Harlowe Guide
+          </p>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        var sections = document.querySelectorAll("[id]");
+        var navLinks = document.querySelectorAll(".nav-link");
+
+        function onScroll() {
+          var scrollY = window.scrollY + 120;
+          var current = "";
+          sections.forEach(function (section) {
+            if (section.offsetTop <= scrollY) current = section.id;
+          });
+          navLinks.forEach(function (link) {
+            link.classList.remove("active");
+            if (link.getAttribute("href") === "#" + current)
+              link.classList.add("active");
+          });
+        }
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+      })();
+    </script>
+  </body>
+</html>
