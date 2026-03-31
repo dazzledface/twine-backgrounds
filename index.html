@@ -781,8 +781,8 @@
               <div class="method-card-body">
                 <p>
                   Convert the image to a Base64 string and embed it directly in
-                  the Story Stylesheet. The story is fully self-contained — no
-                  internet connection needed.
+                  the story's CSS Stylesheet. The story is fully self-contained
+                  — no internet connection needed.
                 </p>
                 <div class="tag-row">
                   <span class="tag good">Works offline</span>
@@ -976,13 +976,15 @@
             passage is displayed, so the right CSS rule fires at the right time.
           </p>
 
-          <h3 id="m2-setup">Step 1 — Add rules to the Story Stylesheet</h3>
+          <h3 id="m2-setup">
+            Step 1 — Add rules to the story's CSS Stylesheet
+          </h3>
 
           <ol class="steps">
             <li>
               <p>
-                In Twine, click the story name in the bottom toolbar →
-                <strong>Edit Story Stylesheet</strong>.
+                In your Twine story, click Story in the top navigation bar, then
+                click <strong>Stylesheet</strong>.
               </p>
             </li>
             <li>
@@ -1136,7 +1138,10 @@ tw-passage {
 <span class="comment">/* ... thousands of characters ... */</span></code></pre>
             </li>
             <li>
-              <p>Open Twine → <strong>Edit Story Stylesheet</strong>.</p>
+              <p>
+                Open your Twine story, select Story from the top navigation bar,
+                then select <strong>Stylesheet</strong>.
+              </p>
             </li>
             <li>
               <p>
@@ -1403,7 +1408,8 @@ tw-passage {
             </li>
             <li>
               <strong>Method 3:</strong> Compressed image to under 400KB,
-              converted with base64-image.de, pasted into Story Stylesheet
+              converted with base64-image.de, pasted into the story's CSS
+              Stylesheet
             </li>
             <li>
               Added <code>tw-passage</code> CSS to style the text box
@@ -1491,7 +1497,7 @@ tw-passage {
                     >tw-passage { background: rgba(255,255,255,0.9); padding:
                     1.5em 2em; }</code
                   >
-                  to the Story Stylesheet, or add
+                  to the story's Stylesheet, or add
                   <code
                     >(enchant: ?passage, (bg:#ffffff) +
                     (css:"padding:1.5em"))</code
